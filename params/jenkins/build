@@ -1,4 +1,4 @@
-SOURCE_REPOSITORY_URL=https://github.com/rhoar-qcon-2018/lab-infrastructure-as-code.git
+SOURCE_REPOSITORY_URL=https://github.com/rhoar-qcon-2018/infrastructure-as-code.git
 NAME=jenkins
 SOURCE_REPOSITORY_REF=master
 SOURCE_REPOSITORY_CONTEXT_DIR=s2i-config/jenkins-master

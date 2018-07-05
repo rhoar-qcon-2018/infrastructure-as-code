@@ -5,6 +5,7 @@
 #set -e
 
 if [[ "${RED_HAT_DEVELOPERS_USERNAME}X" == "X" || "${RED_HAT_DEVELOPERS_PASSWORD}X" == "X" ]]; then
+    printf 'An account on https://developers.redhat.com is required to use this environment. Please enter your credentials here:\n\n'
     printf 'Enter your Red Hat Developers Username: '
     read -s RED_HAT_DEVELOPERS_USERNAME
     echo
@@ -12,6 +13,7 @@ if [[ "${RED_HAT_DEVELOPERS_USERNAME}X" == "X" || "${RED_HAT_DEVELOPERS_PASSWORD
     read -s RED_HAT_DEVELOPERS_PASSWORD
     echo
 else
+    echo "Red Hat Developers credentials found in environment variables."
 fi
 
 DOCKER_CMD_PREFIX=""
@@ -54,7 +56,7 @@ if [[ $MINISHIFT_RUNNING -ne 0 ]]; then
     minishift addons disable registry-route
     minishift config set network-nameserver 8.8.8.8
 
-    minishift start --username ${RED_HAT_DEVELOPERS_USERNAME} --password ${RED_HAT_DEVELOPERS_PASSWORD} --cpus=4 --memory=10GB --vm-driver=virtualbox
+    minishift start --username "${RED_HAT_DEVELOPERS_USERNAME}" --password "${RED_HAT_DEVELOPERS_PASSWORD}" --cpus=4 --memory=10GB --vm-driver=virtualbox
 else
     echo "Minishift is already running"
 fi

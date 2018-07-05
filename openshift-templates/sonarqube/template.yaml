@@ -532,7 +532,7 @@ parameters:
   - name: SOURCE_REPOSITORY_URL
     description: The Git repository where the Docker build resources can be found
     displayName: Repository URL
-    value: https://github.com/rhoar-qcon-2018/lab-infrastructure-as-code.git
+    value: https://github.com/rhoar-qcon-2018/infrastructure-as-code.git
   - name: SOURCE_REPOSITORY_REF
     value: master
     description: Branch from which to get docker build resources
