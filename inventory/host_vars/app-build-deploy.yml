@@ -5,11 +5,13 @@ openshift_cluster_content:
 - object: infra-deploy
   content:
   - name: kafka-cluster
-    file: "{{ playbook_dir }}/openshift-templates/strimzi/template.yaml"
+    template: "{{ playbook_dir }}/openshift-templates/strimzi/template.yaml"
     namespace: "{{ dev_namespace }}"
+    params: "{{ playbook_dir }}/params/strimzi/deploy"
   - name: kafka-cluster
-    file: "{{ playbook_dir }}/openshift-templates/strimzi/template.yaml"
+    template: "{{ playbook_dir }}/openshift-templates/strimzi/template.yaml"
     namespace: "{{ test_namespace }}"
+    params: "{{ playbook_dir }}/params/strimzi/deploy"
 - object: app-builds
   content:
   - name: noun-app-build

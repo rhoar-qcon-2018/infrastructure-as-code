@@ -1,8 +1,9 @@
 apiVersion: template.openshift.io/v1
-kind: List
+kind: Template
 labels:
   template: strimzi-ephemeral-kafka
 metadata:
+  name: kafka
   annotations:
     description: >-
       Creates a small ephemeral kafka cluster.
