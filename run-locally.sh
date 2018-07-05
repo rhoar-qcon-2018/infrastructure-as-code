@@ -57,24 +57,26 @@ if [[ $MINISHIFT_RUNNING -ne 0 ]]; then
     minishift config set network-nameserver 8.8.8.8
 
     minishift start --username "${RED_HAT_DEVELOPERS_USERNAME}" --password "${RED_HAT_DEVELOPERS_PASSWORD}" --cpus=4 --memory=10GB --vm-driver=virtualbox
+    oc delete project myproject
 else
     echo "Minishift is already running"
 fi
 
-DOCKER_REGISTRY_SERVER=https://registry.connect.redhat.com/
-
-oc login -u system:admin
-export DOCKER_REGISTRY_SERVER="registry.connect.redhat.com"
-oc create secret docker-registry rhd-secret-1 --docker-server="${DOCKER_REGISTRY_SERVER}" --docker-username="${RED_HAT_DEVELOPERS_USERNAME}" --docker-password="${RED_HAT_DEVELOPERS_PASSWORD}" --docker-email="user@example.com"
-
-export DOCKER_REGISTRY_SERVER="registry.access.redhat.com"
-oc create secret docker-registry rhd-secret-2 --docker-server="${DOCKER_REGISTRY_SERVER}" --docker-username="${RED_HAT_DEVELOPERS_USERNAME}" --docker-password="${RED_HAT_DEVELOPERS_PASSWORD}" --docker-email="user@example.com"
+minishift ssh -- sudo chmod 777 /var/lib/minishift/openshift.local.pv/pv* -R
 
 oc login -u developer -p developer --insecure-skip-tls-verify=true https://$(minishift ip):8443/
 
 ${DOCKER_CMD_PREFIX} ansible-galaxy install -r requirements.yml --roles-path=roles
 
 ${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=bootstrap
+
+oc project labs-ci-cd
+
+export DOCKER_REGISTRY_SERVER="registry.connect.redhat.com"
+oc create secret docker-registry rhd-secret-1 --docker-server="${DOCKER_REGISTRY_SERVER}" --docker-username="${RED_HAT_DEVELOPERS_USERNAME}" --docker-password="${RED_HAT_DEVELOPERS_PASSWORD}" --docker-email="user@example.com"
+
+export DOCKER_REGISTRY_SERVER="registry.access.redhat.com"
+oc create secret docker-registry rhd-secret-2 --docker-server="${DOCKER_REGISTRY_SERVER}" --docker-username="${RED_HAT_DEVELOPERS_USERNAME}" --docker-password="${RED_HAT_DEVELOPERS_PASSWORD}" --docker-email="user@example.com"
 
 ${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=tools
 
