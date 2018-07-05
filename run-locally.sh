@@ -80,4 +80,4 @@ oc create secret docker-registry rhd-secret-2 --docker-server="${DOCKER_REGISTRY
 
 ${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=tools
 
-${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=apps
+# ${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=apps
