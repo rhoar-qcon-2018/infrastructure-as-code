@@ -1,0 +1,257 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: "owasp-zap"
+objects:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: owasp-zap
+    name: owasp-zap
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: owasp-zap
+      appName: owasp-zap
+      name: owasp-zap
+      type: image
+    name: owasp-zap-openshift
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: owasp-zap:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: "${SOURCE_REPOSITORY_CONTEXT_DIR}"
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: DockerImage
+          name: 'owasp-zap:latest'
+        noCache: true
+      type: Docker
+    triggers:
+    - type: ConfigChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    creationTimestamp: null
+    name: owasp-zap-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${OWASP_ZAP_PERSISTENT_VOLUME_SIZE}
+  status: {}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: owasp-zap
+    name: owasp-zap
+  spec:
+    replicas: 1
+    selector:
+      app: owasp-zap
+      deploymentconfig: owasp-zap
+    strategy:
+      activeDeadlineSeconds: 21600
+      recreateParams:
+        timeoutSeconds: 600
+      resources:
+        limits:
+          cpu: 4000m
+          memory: 3500Mi
+        requests:
+          cpu: 2000m
+          memory: 2500Mi
+      type: Recreate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: owasp-zap
+          deploymentconfig: owasp-zap
+      spec:
+        containers:
+        - imagePullPolicy: IfNotPresent
+          image: ' '
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /?anonym=true&app=ZAP
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          name: owasp-zap-openshift
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8090
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /?anonym=true&app=ZAP
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+          - mountPath: /opt/owasp-zap/data
+            name: owasp-zap-data
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: owasp-zap-data
+          persistentVolumeClaim:
+            claimName: owasp-zap-data
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - owasp-zap
+        from:
+          kind: ImageStreamTag
+          name: owasp-zap:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: owasp-zap-webswing
+    name: owasp-zap-webswing
+  spec:
+    port:
+      targetPort: 8080-tcp
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: owasp-zap
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: owasp-zap-proxy
+    name: owasp-zap-proxy
+  spec:
+    port:
+      targetPort: 8090-tcp
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: owasp-zap
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: owasp-zap
+    name: owasp-zap
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8090-tcp
+      port: 8090
+      protocol: TCP
+      targetPort: 8090
+    selector:
+      deploymentconfig: owasp-zap
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: owasp-zap
+    name: owasp-zap-data
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${OWASP_ZAP_PERSISTENT_VOLUME_CLAIM_SIZE}
+  status: {}
+parameters:
+  - description: OWASP ZAP Persistent volume claim size
+    displayName: OWASP ZAP Persistent volume claim size
+    name: OWASP_ZAP_PERSISTENT_VOLUME_CLAIM_SIZE
+    value: 5Gi
+    required: true
+  - name: OWASP_ZAP_MEMORY
+    description: owasp-zap memory
+    displayName: owasp-zap memory
+    value: 2Gi
+  - name: OWASP_ZAP_CPU
+    description: owasp-zap Container CPU limit
+    displayName: owasp-zap Container CPU limit
+    value: 2000m
+  - name: OWASP_ZAP_PERSISTENT_VOLUME_SIZE
+    description: The persistent storage volume for owasp-zap to use for plugins/config/logs/etc...
+    displayName: owasp-zap Storage Space Size
+    required: true
+    value: 5Gi
+  - name: SOURCE_REPOSITORY_URL
+    description: The Git repository where the Docker build resources can be found
+    displayName: Repository URL
+    value: https://github.com/rht-labs/owasp-zap-openshift.git
+  - name: SOURCE_REPOSITORY_REF
+    value: master
+    description: Branch from which to get docker build resources
+    displayName: Repository branch
+  - name: SOURCE_REPOSITORY_CONTEXT_DIR
+    value:
+    description: Directory path within the repository where the docker build resources can be found
+    displayName: Context directory

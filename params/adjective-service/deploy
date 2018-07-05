@@ -1,0 +1,2 @@
+NAME=adjective-service
+PIPELINES_NAMESPACE=labs-ci-cd

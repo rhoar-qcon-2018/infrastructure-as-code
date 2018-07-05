@@ -1,0 +1,125 @@
+---
+ansible_connection: local
+openshift_cluster_content:
+- galaxy_requirements: "{{ playbook_dir }}/galaxy_requirements.yml"
+### Add template which can be used to create application build/deployment pipelines
+- object: projecttemplates
+  content:
+  - name: pipeline-template
+    file: "{{ playbook_dir }}/openshift-templates/jenkins-pipeline-no-ocp-triggers/template.yaml"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - pipeline-build
+## Add `view` role to service accounts for integration with ConfigMaps
+- object: rolebindings
+  content:
+  - name: fabric8-rolebinding
+    template: "{{ playbook_dir }}/openshift-templates/fabric8-role-bindings/template.yaml"
+    params: "{{ playbook_dir }}/params/rolebindings/fabric8_dev"
+    namespace: "{{ test_namespace }}"
+    tags:
+    - java-deploy
+  - name: fabric8-rolebinding
+    template: "{{ playbook_dir }}/openshift-templates/fabric8-role-bindings/template.yaml"
+    params: "{{ playbook_dir }}/params/rolebindings/fabric8_test"
+    namespace: "{{ test_namespace }}"
+    tags:
+    - java-deploy
+- object: early-ci-cd-builds
+  content:
+  - name: sonarqube
+    template: "{{ playbook_dir }}/openshift-templates/sonarqube/template.yaml"
+    params: "{{ playbook_dir }}/params/sonarqube/build-and-deploy"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - sonar
+  - name: nexus
+    template: "{{ playbook_dir }}/openshift-templates/nexus/template.yaml"
+    params: "{{ playbook_dir }}/params/nexus/deploy"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - nexus
+    post_steps:
+    - role: "labs-ci-cd/roles/configure-nexus"
+- object: ci-cd-builds
+  content:
+  - name: jenkins-slave-mvn
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-slave-pod/template.yaml"
+    params: "{{ playbook_dir }}/params/jenkins-slave-mvn/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - jenkins-slaves
+    - mvn-slave
+  - name: jenkins-slave-npm
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-slave-pod/template.yaml"
+    params: "{{ playbook_dir }}/params/jenkins-slave-npm/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - jenkins-slaves
+    - npm-slave
+  - name: jenkins-slave-zap
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-slave-pod/template.yaml"
+    params: "{{ playbook_dir }}/params/jenkins-slave-zap/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - jenkins-slaves
+    - zap-slave
+  - name: jenkins-slave-ansible
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-slave-pod/template.yaml"
+    params: "{{ playbook_dir }}/params/jenkins-slave-ansible/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+      - jenkins-slaves
+      - ansible-slave
+  - name: tool-box
+    template: "{{ playbook_dir }}/openshift-templates/docker-build/template.yaml"
+    params: "{{ playbook_dir }}/params/tool-box/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+      - tool-boxs
+- object: ci-cd-deployments
+  content:
+  - name: jenkins-s2i
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-s2i-build/template.yaml"
+    params: "{{ playbook_dir }}/params/jenkins/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - jenkins
+  - name: jenkins-persistent
+    template: "{{ playbook_dir }}/openshift-templates/jenkins/jenkins-persistent-template.yaml"
+    params: "{{ playbook_dir }}/params/jenkins/deploy"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - jenkins
+- object: rolebindings
+  content:
+  - name: dev-jenkins
+    template: "{{ playbook_dir }}/openshift-templates/service-account-rolebinding/template.yaml"
+    params: "{{ playbook_dir }}/params/service-account-rolebinding/dev"
+    namespace: "{{ dev_namespace }}"
+  - name: test-jenkins
+    template: "{{ playbook_dir }}/openshift-templates/service-account-rolebinding/template.yaml"
+    params: "{{ playbook_dir }}/params/service-account-rolebinding/test"
+    namespace: "{{ test_namespace }}"
+  - name: dev-jenkins
+    template: "{{ playbook_dir }}/openshift-templates/service-account-rolebinding/template.yaml"
+    params: "{{ playbook_dir }}/params/service-account-rolebinding/default-dev"
+    namespace: "{{ dev_namespace }}"
+  - name: test-jenkins
+    template: "{{ playbook_dir }}/openshift-templates/service-account-rolebinding/template.yaml"
+    params: "{{ playbook_dir }}/params/service-account-rolebinding/default-test"
+    namespace: "{{ test_namespace }}"
+- object: databases
+  content:
+  - name: database
+    template: openshift//postgresql-persistent
+    params: "{{ playbook_dir }}/params/postgresql/test"
+    namespace: "{{ test_namespace }}"
+    tags:
+    - postgresql
+  - name: database
+    template: openshift//postgresql-persistent
+    params: "{{ playbook_dir }}/params/postgresql/dev"
+    namespace: "{{ dev_namespace }}"
+    tags:
+    - postgresql

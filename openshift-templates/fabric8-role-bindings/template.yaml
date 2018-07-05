@@ -1,0 +1,28 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: fabric8-deploy-role-bindings-template
+metadata:
+  annotations:
+    description: A template to support the role bindings needed fabric8 k8s libraries
+    iconClass: icon-cube
+    openshift.io/display-name: Fabric8 Deploy Rolebinding
+    tags: cube
+objects:
+  - apiVersion: v1
+    groupNames:
+      - 'system:serviceaccounts:${APP_NAMESPACE}'
+    kind: RoleBinding
+    metadata:
+      name: view
+    roleRef:
+      name: view
+    subjects:
+      - kind: SystemGroup
+        name: 'system:serviceaccounts:${APP_NAMESPACE}'
+    userNames: null
+parameters:
+  - description: The project/namespace where the App is deployed.
+    displayName: Project/Namespace for the App
+    name: APP_NAMESPACE
+    required: true

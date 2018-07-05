@@ -1,0 +1,3 @@
+PIPELINE_SOURCE_REPOSITORY_URL=https://github.com/rhoar-qcon-2018/reactive-k8s-noun-service.git
+PIPELINE_SOURCE_REPOSITORY_REF=master
+NAME=noun-service

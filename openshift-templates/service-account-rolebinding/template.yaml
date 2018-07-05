@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+kind: Template
+labels:
+  template: rolebindings-template
+message: A template to apply rolebindings to a specified namespace
+name: rolebindings
+objects:
+- apiVersion: authorization.openshift.io/v1
+  groupNames: null
+  kind: RoleBinding
+  metadata:
+    namespace: ${PROJECT_NAMESPACE}
+    name: ${ROLE_REF}-abcde
+  roleRef:
+    name: ${ROLE_REF}
+  subjects:
+  - kind: ${SUBJECT_KIND}
+    name: ${USER_NAME}
+    namespace: ${PIPELINES_NAMESPACE}
+  userNames:
+  - system:serviceaccount:${PIPELINES_NAMESPACE}:${USER_NAME}
+parameters:
+- name: PROJECT_NAMESPACE
+  description: The namespace on which to apply this rolebinding
+  displayName: Project Namespace
+- name: PIPELINES_NAMESPACE
+  description: The namespace inside of which Jenkins runs
+  displayName: Pipelines Namespace
+- name: SUBJECT_KIND
+  description: The Kind of subject (User/ServiceAccount)
+  displayName: Subject Kind
+  value: ServiceAccount
+- name: USER_NAME
+  description: The short username
+  displayName: Short Username
+  value: jenkins
+- name: ROLE_REF
+  value: edit

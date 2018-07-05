@@ -1,0 +1,119 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+labels:
+  template: node-app-deploy-template
+metadata:
+  annotations:
+    description: A template to deploy your a NodeJS App with a HTTP endpoint
+    iconClass: icon-cube
+    openshift.io/display-name: Node HTTP App Deploy Template
+    tags: http
+objects:
+  - apiVersion: v1
+    kind: ImageStream
+    metadata:
+      labels:
+        build: '${NAME}'
+      name: '${NAME}'
+    spec: {}
+  - apiVersion: v1
+    kind: DeploymentConfig
+    metadata:
+      labels:
+        app: '${NAME}'
+      name: '${NAME}'
+    spec:
+      replicas: 1
+      selector:
+        name: '${NAME}'
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            name: '${NAME}'
+        spec:
+          containers:
+            - image: '${NAME}'
+              imagePullPolicy: Always
+              name: '${NAME}'
+              ports:
+                - containerPort: 8080
+                  protocol: TCP
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+      test: false
+      triggers:
+        - type: ConfigChange
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - '${NAME}'
+            from:
+              kind: ImageStreamTag
+              name: '${NAME}:latest'
+          type: ImageChange
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        name: '${NAME}'
+      name: '${NAME}'
+    spec:
+      ports:
+        - name: HTTP
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        name: '${NAME}'
+      sessionAffinity: None
+      type: ClusterIP
+  - apiVersion: v1
+    kind: Route
+    metadata:
+      labels:
+        name: '${NAME}'
+      name: '${NAME}'
+    spec:
+      port:
+        targetPort: HTTP
+      to:
+        kind: Service
+        name: '${NAME}'
+        weight: 100
+      wildcardPolicy: None
+  - apiVersion: v1
+    kind: RoleBinding
+    metadata:
+      name: jenkins_pipeline_edit
+    roleRef:
+      name: edit
+    subjects:
+      - kind: ServiceAccount
+        name: jenkins
+        namespace: '${PIPELINES_NAMESPACE}'
+    userNames:
+      - 'system:serviceaccount:${PIPELINES_NAMESPACE}:jenkins'
+parameters:
+  - description: The name assigned to all objects and the related imagestream.
+    displayName: Name
+    name: NAME
+    required: true
+  - description: The project/namespace where the Jenkins executing pipelines is deployed.
+    displayName: Project/Namespace for Jenkins Pipelines
+    name: PIPELINES_NAMESPACE
+    required: true

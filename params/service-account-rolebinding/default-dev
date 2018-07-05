@@ -1,0 +1,4 @@
+PROJECT_NAMESPACE=labs-dev
+PIPELINES_NAMESPACE=labs-dev
+ROLE_REF=view
+USER_NAME=default

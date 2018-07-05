@@ -1,0 +1,30 @@
+
+---
+ansible_connection: local
+openshift_cluster_content:
+- object: app-builds
+  content:
+  - name: noun-app-build
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-pipeline-no-ocp-triggers/template.yaml"
+    params: "{{ playbook_dir }}/params/noun-service/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - npm-build
+  - name: adjective-app-build
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-pipeline-no-ocp-triggers/template.yaml"
+    params: "{{ playbook_dir }}/params/adjective-service/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - spring-build
+  - name: ui-app-build
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-pipeline-no-ocp-triggers/template.yaml"
+    params: "{{ playbook_dir }}/params/ui-service/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - vertx-build
+  - name: kafka-app-build
+    template: "{{ playbook_dir }}/openshift-templates/jenkins-pipeline-no-ocp-triggers/template.yaml"
+    params: "{{ playbook_dir }}/params/kafka-service/build"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - vertx-build

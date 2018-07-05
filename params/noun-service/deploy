@@ -1,0 +1,2 @@
+NAME=noun-service
+PIPELINES_NAMESPACE=labs-ci-cd

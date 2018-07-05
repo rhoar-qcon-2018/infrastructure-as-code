@@ -1,0 +1,3 @@
+PIPELINE_SOURCE_REPOSITORY_URL=https://github.com/rhoar-qcon-2018/kafka-service.git
+PIPELINE_SOURCE_REPOSITORY_REF=master
+NAME=kafka-service
