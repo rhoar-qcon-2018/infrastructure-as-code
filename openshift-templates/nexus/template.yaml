@@ -144,4 +144,4 @@ parameters:
   - description: The Container Image to use for the ImageStream
     displayName: Nexus Container Image
     name: CONTAINER_IMAGE
-    value: 'sonatype/nexus3'
+    value: 'sonatype/nexus3:3.7.1'
