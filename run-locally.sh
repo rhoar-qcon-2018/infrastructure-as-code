@@ -56,7 +56,7 @@ if [[ $MINISHIFT_RUNNING -ne 0 ]]; then
     minishift addons disable registry-route
     minishift config set network-nameserver 8.8.8.8
 
-    minishift start --username "${RED_HAT_DEVELOPERS_USERNAME}" --password "${RED_HAT_DEVELOPERS_PASSWORD}" --cpus=4 --memory=10GB --vm-driver=virtualbox
+    minishift start --username "${RED_HAT_DEVELOPERS_USERNAME}" --password "${RED_HAT_DEVELOPERS_PASSWORD}" --disk-size 40GB --cpus=4 --memory=10GB --vm-driver=virtualbox
     oc delete project myproject
 else
     echo "Minishift is already running"
@@ -80,4 +80,4 @@ oc create secret docker-registry rhd-secret-2 --docker-server="${DOCKER_REGISTRY
 
 ${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=tools
 
-# ${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=apps
+${DOCKER_CMD_PREFIX} ansible-playbook apply.yml -i inventory/ -e target=apps
