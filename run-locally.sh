@@ -63,7 +63,6 @@ else
 fi
 
 minishift ssh -- sudo chmod 777 /var/lib/minishift/openshift.local.pv/pv* -R
-
 oc login -u developer -p developer --insecure-skip-tls-verify=true https://$(minishift ip):8443/
 
 ${DOCKER_CMD_PREFIX} ansible-galaxy install -r requirements.yml --roles-path=roles

@@ -2,6 +2,10 @@
 ---
 ansible_connection: local
 openshift_cluster_content:
+- object: infra-deploy
+  content:
+  - name: kafka-cluster
+    file: "{{ playbook_dir }}/openshift-templates/strimzi/template.yaml"
 - object: app-builds
   content:
   - name: noun-app-build
