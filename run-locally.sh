@@ -61,6 +61,15 @@ else
     echo "Minishift is already running"
 fi
 
+DOCKER_REGISTRY_SERVER=https://registry.connect.redhat.com/
+
+oc login -u system:admin
+export DOCKER_REGISTRY_SERVER="registry.connect.redhat.com"
+oc create secret docker-registry rhd-secret-1 --docker-server="${DOCKER_REGISTRY_SERVER}" --docker-username="${RED_HAT_DEVELOPERS_USERNAME}" --docker-password="${RED_HAT_DEVELOPERS_PASSWORD}" --docker-email="user@example.com"
+
+export DOCKER_REGISTRY_SERVER="registry.access.redhat.com"
+oc create secret docker-registry rhd-secret-2 --docker-server="${DOCKER_REGISTRY_SERVER}" --docker-username="${RED_HAT_DEVELOPERS_USERNAME}" --docker-password="${RED_HAT_DEVELOPERS_PASSWORD}" --docker-email="user@example.com"
+
 oc login -u developer -p developer --insecure-skip-tls-verify=true https://$(minishift ip):8443/
 
 ${DOCKER_CMD_PREFIX} ansible-galaxy install -r requirements.yml --roles-path=roles
