@@ -6,6 +6,10 @@ openshift_cluster_content:
   content:
   - name: kafka-cluster
     file: "{{ playbook_dir }}/openshift-templates/strimzi/template.yaml"
+    namespace: "{{ dev_namespace }}"
+  - name: kafka-cluster
+    file: "{{ playbook_dir }}/openshift-templates/strimzi/template.yaml"
+    namespace: "{{ test_namespace }}"
 - object: app-builds
   content:
   - name: noun-app-build
