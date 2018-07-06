@@ -4,17 +4,17 @@
 #set -x
 #set -e
 
-if [[ "${RED_HAT_DEVELOPERS_USERNAME}X" == "X" || "${RED_HAT_DEVELOPERS_PASSWORD}X" == "X" ]]; then
-    printf 'An account on https://developers.redhat.com is required to use this environment. Please enter your credentials here:\n\n'
-    printf 'Enter your Red Hat Developers Username: '
-    read -s RED_HAT_DEVELOPERS_USERNAME
-    echo
-    printf 'Enter your Red Hat Developers Password: '
-    read -s RED_HAT_DEVELOPERS_PASSWORD
-    echo
-else
-    echo "Red Hat Developers credentials found in environment variables."
-fi
+# if [[ "${RED_HAT_DEVELOPERS_USERNAME}X" == "X" || "${RED_HAT_DEVELOPERS_PASSWORD}X" == "X" ]]; then
+#     printf 'An account on https://developers.redhat.com is required to use this environment. Please enter your credentials here:\n\n'
+#     printf 'Enter your Red Hat Developers Username: '
+#     read -s RED_HAT_DEVELOPERS_USERNAME
+#     echo
+#     printf 'Enter your Red Hat Developers Password: '
+#     read -s RED_HAT_DEVELOPERS_PASSWORD
+#     echo
+# else
+#     echo "Red Hat Developers credentials found in environment variables."
+# fi
 
 DOCKER_CMD_PREFIX=""
 
@@ -45,25 +45,20 @@ else
     fi
 fi
 
-minishift status | grep Running
+oc cluster status | grep "not running"
 MINISHIFT_RUNNING=$?
 
-if [[ $MINISHIFT_RUNNING -ne 0 ]]; then
-    minishift addons enable anyuid
-    minishift addons enable admin
-    minishift addons enable xpaas
-    minishift addons disable che
-    minishift addons disable registry-route
-    minishift config set network-nameserver 8.8.8.8
-
-    minishift start --username "${RED_HAT_DEVELOPERS_USERNAME}" --password "${RED_HAT_DEVELOPERS_PASSWORD}" --disk-size 40GB --cpus=4 --memory=10GB --vm-driver=virtualbox
+if [[ $MINISHIFT_RUNNING -eq 0 ]]; then
+    oc cluster up --host-data-dir=/var/lib/origin/openshift.local.data --image-streams=rhel7 --service-catalog=true --use-existing-config=true
     oc delete project myproject
 else
     echo "Minishift is already running"
 fi
 
-minishift ssh -- sudo chmod 777 /var/lib/minishift/openshift.local.pv/pv* -R
-oc login -u developer -p developer --insecure-skip-tls-verify=true https://$(minishift ip):8443/
+oc login -u system:admin
+oc import-image redhat-openjdk18-openshift:1.1 --from=registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift --confirm
+
+oc login -u developer -p developer --insecure-skip-tls-verify=true $(oc cluster status | grep "Web console" | awk -F": " '{print $2}')
 
 ${DOCKER_CMD_PREFIX} ansible-galaxy install -r requirements.yml --roles-path=roles
 
