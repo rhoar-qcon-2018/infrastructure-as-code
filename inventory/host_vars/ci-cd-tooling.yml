@@ -79,6 +79,12 @@ openshift_cluster_content:
       - tool-boxs
 - object: ci-cd-deployments
   content:
+  - name: maven-cache
+    template: "{{ playbook_dir }}/openshift-templates/maven-cache/template.yaml"
+    params: "{{ playbook_dir }}/params/maven-cache/deploy"
+    namespace: "{{ ci_cd_namespace }}"
+    tags:
+    - jenkins-slaves
   - name: jenkins-s2i
     template: "{{ playbook_dir }}/openshift-templates/jenkins-s2i-build/template.yaml"
     params: "{{ playbook_dir }}/params/jenkins/build"
