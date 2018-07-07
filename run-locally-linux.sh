@@ -49,7 +49,7 @@ oc cluster status | grep "not running"
 MINISHIFT_RUNNING=$?
 
 if [[ $MINISHIFT_RUNNING -eq 0 ]]; then
-    oc cluster up --public-hostname=192.168.1.113 --host-data-dir=/var/lib/origin/openshift.local.data --image-streams=rhel7 --service-catalog=true --use-existing-config=true
+    oc cluster up --host-data-dir=/var/lib/origin/openshift.local.data --image-streams=rhel7 --service-catalog=true --use-existing-config=true
     oc delete project myproject
 else
     echo "Minishift is already running"
