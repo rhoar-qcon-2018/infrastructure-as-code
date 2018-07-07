@@ -49,7 +49,7 @@ oc cluster status | grep "not running"
 MINISHIFT_RUNNING=$?
 
 if [[ $MINISHIFT_RUNNING -eq 0 ]]; then
-    oc cluster up --host-data-dir=/var/lib/origin/openshift.local.data --image-streams=rhel7 --service-catalog=true --use-existing-config=true
+    oc cluster up --public-hostname=192.168.1.113 --host-data-dir=/var/lib/origin/openshift.local.data --image-streams=rhel7 --service-catalog=true --use-existing-config=true
     oc delete project myproject
 else
     echo "Minishift is already running"
@@ -58,7 +58,7 @@ fi
 oc login -u system:admin
 oc import-image redhat-openjdk18-openshift:1.1 --from=registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift --confirm
 
-oc login -u developer -p developer --insecure-skip-tls-verify=true $(oc cluster status | grep "Web console" | awk -F": " '{print $2}')
+oc login -u developer -p developer --insecure-skip-tls-verify=true
 
 ${DOCKER_CMD_PREFIX} ansible-galaxy install -r requirements.yml --roles-path=roles
 
