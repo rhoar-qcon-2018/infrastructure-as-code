@@ -8,6 +8,12 @@ metadata:
     description: Create a shared PVC and Jenkins slave configmap which will allow for caching Maven data
     iconClass: icon-jenkins
     tags: instant-app,jenkins
+parameters:
+- name: PIPELINES_NAMESPACE
+  description: The namespace where Jenkins and the Pipeline BuildConfigs exist
+  displayName: Pipelines Namespace
+  required: true
+  value: labs-ci-cd
 objects:
 - apiVersion: v1
   kind: PersistentVolumeClaim
@@ -40,7 +46,7 @@ objects:
         <containers>
           <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
             <name>jnlp</name>
-            <image>jenkins-slave-mvn</image>
+            <image>docker-registry.default.svc.cluster.local:5000/${PIPELINES_NAMESPACE}/jenkins-slave-mvn</image>
             <privileged>false</privileged>
             <alwaysPullImage>false</alwaysPullImage>
             <workingDir>/tmp</workingDir>
