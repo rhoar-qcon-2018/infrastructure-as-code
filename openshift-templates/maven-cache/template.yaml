@@ -46,7 +46,7 @@ objects:
         <containers>
           <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
             <name>jnlp</name>
-            <image>docker-registry.default:5000/${PIPELINES_NAMESPACE}/jenkins-slave-mvn</image>
+            <image>docker-registry.default.svc:5000/${PIPELINES_NAMESPACE}/jenkins-slave-mvn</image>
             <privileged>false</privileged>
             <alwaysPullImage>false</alwaysPullImage>
             <workingDir>/tmp</workingDir>
