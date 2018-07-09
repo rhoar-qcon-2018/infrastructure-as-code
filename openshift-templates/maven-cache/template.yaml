@@ -27,7 +27,7 @@ objects:
         <name>jenkins-slave-mvn</name>
         <instanceCap>2147483647</instanceCap>
         <idleMinutes>0</idleMinutes>
-        <label>dotnet-build-pod</label>
+        <label>jenkins-slave-mvn</label>
         <serviceAccount>jenkins</serviceAccount>
         <nodeSelector></nodeSelector>
         <volumes>
